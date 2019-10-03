@@ -1,0 +1,23 @@
+hadoop jar /opt/hadoop/hadoop-2.9.2/share/hadoop/tools/lib/hadoop-streaming-2.9.2.jar  -input /user/$USER/data/input/title.basics.tsv  -output /user/$USER/data/output001 -mapper mapper.py  -reducer reducer.py -file mapper.py  -file reducer.py
+
+hadoop jar /opt/hadoop/hadoop-2.9.2/share/hadoop/tools/lib/hadoop-streaming-2.9.2.jar -D mapred.job.name='001' -input /user/$USER/data/input/title.basics.tsv  -output /user/$USER/data/output002 -mapper mapper.py  -reducer reducer.py -file mapper.py  -file reducer.py
+
+hdfs dfs -cat /user/$USER/data/input/title.basics.tsv | ./mapper.py | sort -t'|' -k1,1 | ./reducer.py
+
+hadoop jar /opt/hadoop/hadoop-2.9.2/share/hadoop/tools/lib/hadoop-streaming-2.9.2.jar -D mapred.job.name='001' -D stream.map.output.field.separator=- -D stream.num.map.output.key.fields=2 -input /user/$USER/data/input/title.basics.tsv  -output /user/$USER/data/output002 -mapper mapper.py  -reducer reducer.py -file mapper.py  -file reducer.py
+
+hadoop jar /opt/hadoop/hadoop-2.9.2/share/hadoop/tools/lib/hadoop-streaming-2.9.2.jar -D mapred.job.name='001' -D mapreduce.job.output.key.comparator.class=org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator -D stream.map.output.field.separator=. -D stream.num.map.output.key.fields=2 -input /user/$USER/data/input/title.basics.tsv  -output /user/$USER/data/output002 -mapper mapper.py  -reducer reducer.py -file mapper.py
+
+hadoop jar /opt/hadoop/hadoop-2.9.2/share/hadoop/tools/lib/hadoop-streaming-2.9.2.jar -D mapreduce.job.output.key.comparator.class=org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator -D mapreduce.map.output.key.field.separator="|" -D stream.map.output.field.separator="|" -D stream.num.map.output.key.fields=2 -D num.key.fields.for.partition=1 -input /user/$USER/data/input/secondary.txt -output /user/$USER/data/output/* -mapper cat -reducer cat -partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner
+
+
+
+remove folders
+hdfs dfs -rm -r -f /user/$USER/output
+
+hdfs dfs -ls /user/$USER/output
+hdfs dfs -cat /user/$USER/output/part-00000
+hdfs dfs -cat /user/$USER/output/part-00001
+
+
+hadoop jar /opt/hadoop/hadoop-2.9.2/share/hadoop/tools/lib/hadoop-streaming-2.9.2.jar -D mapreduce.job.output.key.comparator.class=org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator -D mapreduce.map.output.key.field.separator="|" -D stream.map.output.field.separator="|" -D stream.num.map.output.key.fields=3 -D num.key.fields.for.partition=2 -D mapreduce.partition.keypartitioner.options=-k1,2 -D mapreduce.partition.keycomparator.options=-k3 -input /user/$USER/data/input/secondary.txt -output /user/$USER/output -mapper cat -reducer cat -partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner
