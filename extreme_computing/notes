@@ -21,3 +21,19 @@ hdfs dfs -cat /user/$USER/output/part-00001
 
 
 hadoop jar /opt/hadoop/hadoop-2.9.2/share/hadoop/tools/lib/hadoop-streaming-2.9.2.jar -D mapreduce.job.output.key.comparator.class=org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator -D mapreduce.map.output.key.field.separator="|" -D stream.map.output.field.separator="|" -D stream.num.map.output.key.fields=3 -D num.key.fields.for.partition=2 -D mapreduce.partition.keypartitioner.options=-k1,2 -D mapreduce.partition.keycomparator.options=-k3 -input /user/$USER/data/input/secondary.txt -output /user/$USER/output -mapper cat -reducer cat -partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner
+
+map.output.key.field.separator： map中key内部的分隔符；设置 map 输出分区时 key 内部的分割符为 .
+num.key.fields.for.partition： 分桶时，key按前面指定的分隔符分隔之后，用于分桶的key占的列数。通俗地讲，就是partition时候按照key中的前几列进行划分，相同的key会被打到同一个reduce里。
+
+stream.map.output.field.separator： map中的key与value分隔符
+stream.num.map.output.key.fields： map中分隔符的位置  输出
+
+stream.reduce.output.field.separator： reduce中key与value的分隔符
+stream.num.reduce.output.key.fields： reduce中分隔符的位置
+
+-D mapreduce.partition.keypartitioner.options=-k1,2 设置按前两个字段分区
+-D mapreduce.partition.keycomparator.options="-k1,1r -k2,2 -k3,3"
+
+mapreduce.partition.keycomparator.options=-k2,2nr：指定第二个字段为排序字段，-n 是指按自然顺序排序，-r 指倒叙排序。
+
+mapreduce.job.reduces=12：reduce 数为12
